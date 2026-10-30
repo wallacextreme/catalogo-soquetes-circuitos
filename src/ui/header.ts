@@ -115,7 +115,7 @@ export function renderHeader(
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
           
           <!-- Logo e Identificação do Balcão -->
-          <div class="flex items-center justify-between">
+          <div class="flex items-center justify-between shrink-0">
             <div class="flex items-center gap-3">
               <div class="w-10 h-10 rounded-xl bg-blue-600 dark:bg-blue-500 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
                 ${icons.circuit("w-6 h-6")}
@@ -142,7 +142,7 @@ export function renderHeader(
           </div>
 
           <!-- Omnibox de Busca Instantânea (< 50ms) -->
-          <div class="flex-1 max-w-2xl mx-auto w-full">
+          <div class="flex-1 min-w-0 max-w-3xl mx-auto w-full">
             <div class="relative flex items-center">
               <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
                 ${icons.search("w-5 h-5")}
@@ -150,8 +150,9 @@ export function renderHeader(
               <input
                 type="text"
                 id="omnibox-input"
-                class="block w-full pl-11 pr-24 py-2.5 bg-slate-100 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 font-medium focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm transition-all shadow-inner"
-                placeholder="Buscar por Caixa (ex: 05, cx 12), Código (ETE-7490, DP-3015) ou Carro..."
+                class="block w-full pl-11 pr-11 py-2.5 bg-slate-100 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 font-medium focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm transition-all shadow-inner"
+                placeholder="Buscar por Caixa (ex: 05, cx 12), Código (ETE-7490, DP-3015), Lado (LD/LE) ou Carro..."
+                title="Buscar por Caixa (ex: 05, cx 12), Código (ETE-7490, DP-3015), Lado (LD/LE) ou Carro..."
                 value="${filters.searchQuery}"
                 autocomplete="off"
                 spellcheck="false"
@@ -173,19 +174,23 @@ export function renderHeader(
                 >/</span>
               </div>
             </div>
-            <!-- Status de Busca e Latência -->
+            <!-- Status de Busca, Dica de Pesquisa e Latência -->
             <div class="flex items-center justify-between px-1 pt-1 text-[11px] text-slate-500 dark:text-slate-400">
-              <span>
-                <strong id="header-results-count" class="font-bold text-slate-900 dark:text-slate-100">${totalResults}</strong> peças localizadas
+              <span class="flex items-center gap-1.5 truncate">
+                <span><strong id="header-results-count" class="font-bold text-slate-900 dark:text-slate-100">${totalResults}</strong> peças</span>
+                <span class="text-slate-300 dark:text-slate-700 hidden sm:inline">•</span>
+                <span class="hidden md:inline text-slate-500 dark:text-slate-400 truncate">
+                  Exemplos: <code class="font-mono text-blue-600 dark:text-blue-400 font-bold">01</code>, <code class="font-mono text-blue-600 dark:text-blue-400 font-bold">cx 73</code>, <code class="font-mono text-blue-600 dark:text-blue-400 font-bold">ete-7491</code>, <code class="font-mono text-blue-600 dark:text-blue-400 font-bold">gol bola ld</code>, <code class="font-mono text-blue-600 dark:text-blue-400 font-bold">h7</code>
+                </span>
               </span>
-              <span id="header-latency-ms" class="font-mono text-emerald-600 dark:text-emerald-400">
+              <span id="header-latency-ms" class="font-mono text-emerald-600 dark:text-emerald-400 shrink-0 ml-2">
                 latência: ${latencyMs}ms
               </span>
             </div>
           </div>
 
           <!-- Ações e Modos de Visualização Desktop -->
-          <div class="hidden lg:flex items-center gap-2">
+          <div class="hidden lg:flex items-center gap-2 shrink-0">
             
             <!-- Alternador de Modos de Visão -->
             <div class="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
