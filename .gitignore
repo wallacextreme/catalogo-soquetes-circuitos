@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+dist/
+dist-ssr/
+build/
+*.local
+
+# Tauri build artifacts
+src-tauri/target/
+
+# Python cache & temp
+__pycache__/
+*.py[cod]
+*$py.class
+.converted_docx/
+scripts/.converted_docx/
+scripts/.playwright_scrape_cache.json
+.pytest_cache/
+
+# Zip bundles & large unpacked references
+*.zip
+rea-main/
+ui-ux-pro-max-skill-main/
+playwright-main/
+
+# OS / Editor files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.vscode/
+.idea/

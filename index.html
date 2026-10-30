@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#1d4ed8" />
+    <meta name="description" content="Catálogo Interno de Balcão — Localizador Visual de Caixas, Placas de Circuito de Lanterna e Soquetes Diversos" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="stylesheet" href="/src/style.css" />
+    <title>Catálogo de Balcão — Placas de Circuito & Soquetes</title>
+  </head>
+  <body class="min-h-screen flex flex-col antialiased">
+    
+    <!-- Top Header Sticky -->
+    <div id="header-root"></div>
+
+    <!-- Quick Filter Bar -->
+    <div id="filters-root"></div>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 w-full">
+      
+      <!-- Container da Grade / Mural de Produtos -->
+      <div id="products-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <!-- Injetado dinamicamente via TypeScript -->
+      </div>
+
+      <!-- Estado Vazio (Nenhuma peça encontrada) -->
+      <div id="empty-state" class="hidden py-16 text-center max-w-md mx-auto space-y-3">
+        <div class="w-16 h-16 mx-auto rounded-2xl bg-slate-200 dark:bg-slate-800 text-slate-400 flex items-center justify-center">
+          <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.3-4.3"></path>
+          </svg>
+        </div>
+        <h3 class="text-base font-bold text-slate-800 dark:text-slate-200">Nenhuma peça localizada</h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400">
+          Tente buscar pelo número de outra caixa (ex: <code class="font-mono font-bold text-blue-600">01</code>, <code class="font-mono font-bold text-blue-600">73</code>) ou limpe os filtros rápidos.
+        </p>
+        <button id="btn-empty-clear" class="px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-bold shadow hover:bg-blue-700 transition-colors">
+          Limpar Filtros e Busca
+        </button>
+      </div>
+
+    </main>
+
+    <!-- Rodapé Discreto de Balcão -->
+    <footer class="py-4 border-t border-slate-200 dark:border-slate-800 text-center text-xs text-slate-400 dark:text-slate-500">
+      Catálogo Interno de Balcão Offline-First — Versão Industrial 1.0.0
+    </footer>
+
+    <!-- App Entry Point -->
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
