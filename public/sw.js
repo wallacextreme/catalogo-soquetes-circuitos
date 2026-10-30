@@ -3,10 +3,7 @@ const CACHE_NAME = 'balcao-soquetes-v1';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
-  '/manifest.webmanifest',
-  '/src/style.css',
-  '/src/main.ts',
-  '/src/data/catalog-master-seed.json'
+  '/manifest.webmanifest'
 ];
 
 self.addEventListener('install', (event) => {
