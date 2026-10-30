@@ -39,6 +39,13 @@ export function searchCatalog(
       return false;
     }
 
+    // 1.1 Filtro por Subcategoria
+    if (filters.subCategory && filters.subCategory !== 'all') {
+      if (item.subCategory !== filters.subCategory) {
+        return false;
+      }
+    }
+
     // 2. Filtros de Placas de Circuito
     if (item.macroCategory === 'circuito' && item.circuitSpecs) {
       if (filters.circuitSide !== 'all') {

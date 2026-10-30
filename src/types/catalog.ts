@@ -74,6 +74,7 @@ export type ViewMode = 'grid' | 'mural' | 'boxmap';
 export interface FilterState {
   searchQuery: string;
   macroCategory: 'all' | 'circuito' | 'soquete';
+  subCategory?: string;
   circuitSide: 'all' | 'LD' | 'LE' | 'LD/LE (Ambos)';
   circuitSystem: 'all' | 'Arteb' | 'Cibié';
   socketPoles: 'all' | 1 | 2;

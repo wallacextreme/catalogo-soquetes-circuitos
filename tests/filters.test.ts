@@ -72,5 +72,19 @@ describe('Filtros Especializados de Balcão (LD/LE, Polos, Farol, Montadora)', (
     const fiat = searchCatalog(items, { ...defaultFilters, make: 'Fiat' });
     expect(fiat.results.length).toBeGreaterThan(0);
   });
+
+  it('filtra por Subcategoria (Farol e Milha, Lanterna e Pisca, Painel e Instrumentos)', () => {
+    const farol = searchCatalog(items, { ...defaultFilters, subCategory: 'Farol e Milha' });
+    expect(farol.results.length).toBe(9);
+    expect(farol.results.every(it => it.subCategory === 'Farol e Milha')).toBe(true);
+
+    const pisca = searchCatalog(items, { ...defaultFilters, subCategory: 'Lanterna e Pisca' });
+    expect(pisca.results.length).toBe(24);
+    expect(pisca.results.every(it => it.subCategory === 'Lanterna e Pisca')).toBe(true);
+
+    const painel = searchCatalog(items, { ...defaultFilters, subCategory: 'Painel e Instrumentos' });
+    expect(painel.results.length).toBe(17);
+    expect(painel.results.every(it => it.subCategory === 'Painel e Instrumentos')).toBe(true);
+  });
 });
 

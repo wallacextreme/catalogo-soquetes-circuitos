@@ -1,16 +1,21 @@
-// Barra de Filtros Rápidos Organizada e Sem Barra de Rolagem (flex-wrap responsivo)
+// Barra de Filtros Organizada e Sem Barra de Rolagem (Alinhada ao Padrão Ouro de Balcão)
+// Linha 4: CATEGORIAS: [Todas] [Placas] [Soquetes] [Subcategorias] | MONTADORA: [Select] ESPECIFICAÇÕES: [Select] [Limpar]
+
 import { FilterState, MacroCategory } from '../types/catalog';
 import { icons } from './icons';
 
 export interface FilterCallbacks {
   onMacroChange: (macro: 'all' | MacroCategory) => void;
-  onCircuitSideChange: (side: 'all' | 'LD' | 'LE' | 'LD/LE (Ambos)') => void;
-  onCircuitSystemChange: (system: 'all' | 'Arteb' | 'Cibié') => void;
-  onSocketPolesChange: (poles: 'all' | 1 | 2) => void;
-  onSocketLampChange: (lamp: 'all' | 'H7' | 'H4' | 'T10' | 'T5' | 'Porcelana' | 'Pino Desencontrado') => void;
+  onSubCategoryChange?: (sub: string) => void;
+  onCategoryPillClick: (macro: 'all' | MacroCategory, sub: string) => void;
+  onSpecChange: (specKey: string) => void;
   onMakeChange: (make: string) => void;
-  onHasPhotoChange?: (status: 'all' | 'withPhoto' | 'multiPhoto') => void;
   onResetFilters: () => void;
+  // Métodos legados mantidos para compatibilidade
+  onCircuitSideChange?: (side: 'all' | 'LD' | 'LE' | 'LD/LE (Ambos)') => void;
+  onCircuitSystemChange?: (system: 'all' | 'Arteb' | 'Cibié') => void;
+  onSocketPolesChange?: (poles: 'all' | 1 | 2) => void;
+  onSocketLampChange?: (lamp: 'all' | 'H7' | 'H4' | 'T10' | 'T5' | 'Porcelana' | 'Pino Desencontrado') => void;
 }
 
 export function renderFilters(
@@ -21,171 +26,201 @@ export function renderFilters(
 ): void {
   const isCircuito = filters.macroCategory === 'circuito';
   const isSoquete = filters.macroCategory === 'soquete';
-  const isAll = filters.macroCategory === 'all';
+  const isAll = filters.macroCategory === 'all' && (!filters.subCategory || filters.subCategory === 'all');
 
   const hasActiveFilters =
+    filters.macroCategory !== 'all' ||
+    (Boolean(filters.subCategory) && filters.subCategory !== 'all') ||
     filters.circuitSide !== 'all' ||
     filters.circuitSystem !== 'all' ||
     filters.socketPoles !== 'all' ||
     filters.socketLamp !== 'all' ||
-    (filters.make && filters.make !== 'all');
+    (Boolean(filters.make) && filters.make !== 'all');
+
+  // Determina a especificação atualmente ativa para o <select>
+  let currentSpecVal = 'all';
+  if (filters.circuitSide === 'LD') currentSpecVal = 'side:LD';
+  else if (filters.circuitSide === 'LE') currentSpecVal = 'side:LE';
+  else if (filters.circuitSide === 'LD/LE (Ambos)') currentSpecVal = 'side:LD/LE (Ambos)';
+  else if (filters.circuitSystem === 'Arteb') currentSpecVal = 'sys:Arteb';
+  else if (filters.circuitSystem === 'Cibié') currentSpecVal = 'sys:Cibié';
+  else if (filters.socketPoles === 1) currentSpecVal = 'poles:1';
+  else if (filters.socketPoles === 2) currentSpecVal = 'poles:2';
+  else if (filters.socketLamp === 'H7') currentSpecVal = 'lamp:H7';
+  else if (filters.socketLamp === 'H4') currentSpecVal = 'lamp:H4';
+  else if (filters.socketLamp === 'T10') currentSpecVal = 'lamp:T10';
+  else if (filters.socketLamp === 'T5') currentSpecVal = 'lamp:T5';
+  else if (filters.socketLamp === 'Porcelana') currentSpecVal = 'lamp:Porcelana';
+  else if (filters.socketLamp === 'Pino Desencontrado') currentSpecVal = 'lamp:Pino Desencontrado';
+
+  const activePillCls = 'bg-blue-600 text-white font-bold shadow-sm';
+  const inactivePillCls =
+    'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-semibold border border-slate-200/60 dark:border-slate-700/60';
 
   container.innerHTML = `
-    <div class="bg-slate-50/90 dark:bg-slate-900/70 border-b border-slate-200 dark:border-slate-800 py-3 transition-colors">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-3">
+    <div class="w-full pb-3 pt-1">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        <!-- 1. Linha Superior: Macro-Abas Principais + Botão Limpar Filtros -->
-        <div class="flex items-center justify-between flex-wrap gap-2.5">
-          <div class="flex items-center gap-1.5 p-1 bg-slate-200/80 dark:bg-slate-800 rounded-2xl shadow-inner">
-            <button
-              id="tab-macro-all"
-              class="px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
-                isAll
-                  ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-              }"
-            >
-              <span>Todos os Itens</span>
-              <span class="px-2 py-0.5 rounded-full text-[10px] font-mono bg-slate-100 dark:bg-slate-800 font-black">${counts.total}</span>
-            </button>
+        <!-- LINHA 4: CATEGORIAS + MONTADORA + ESPECIFICAÇÕES + LIMPAR FILTROS -->
+        <div class="flex items-center gap-2 flex-wrap text-xs">
+          
+          <!-- Rótulo CATEGORIAS -->
+          <span class="text-[10px] uppercase font-black tracking-wider text-slate-400 dark:text-slate-500 shrink-0">
+            CATEGORIAS:
+          </span>
 
-            <button
-              id="tab-macro-circuito"
-              class="px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
-                isCircuito
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400'
-              }"
-            >
-              ${icons.circuit("w-4 h-4")}
-              <span>Placas de Circuito</span>
-              <span class="px-2 py-0.5 rounded-full text-[10px] font-mono ${isCircuito ? 'bg-blue-700 text-white' : 'bg-slate-100 dark:bg-slate-800'} font-black">${counts.circuito}</span>
-            </button>
+          <!-- Pills de Categorias (Formato Pílula / Rounded-Full) -->
+          <button
+            class="pill-category px-3 py-1 rounded-full text-xs transition-all cursor-pointer ${
+              isAll ? activePillCls : inactivePillCls
+            }"
+            data-macro="all"
+            data-sub="all"
+          >
+            Todas (${counts.total})
+          </button>
 
-            <button
-              id="tab-macro-soquete"
-              class="px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
-                isSoquete
-                  ? 'bg-amber-600 text-white shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400'
-              }"
+          <button
+            class="pill-category px-3 py-1 rounded-full text-xs transition-all cursor-pointer ${
+              isCircuito && (!filters.subCategory || filters.subCategory === 'all')
+                ? activePillCls
+                : inactivePillCls
+            }"
+            data-macro="circuito"
+            data-sub="all"
+          >
+            Placas de Circuito (${counts.circuito})
+          </button>
+
+          <button
+            class="pill-category px-3 py-1 rounded-full text-xs transition-all cursor-pointer ${
+              isSoquete && (!filters.subCategory || filters.subCategory === 'all')
+                ? activePillCls
+                : inactivePillCls
+            }"
+            data-macro="soquete"
+            data-sub="all"
+          >
+            Soquetes Diversos (${counts.soquete})
+          </button>
+
+          <!-- Subcategorias Rápidas Mais Procuradas no Balcão -->
+          <button
+            class="pill-category px-3 py-1 rounded-full text-xs transition-all cursor-pointer ${
+              filters.subCategory === 'Lanterna e Pisca' ? activePillCls : inactivePillCls
+            }"
+            data-macro="soquete"
+            data-sub="Lanterna e Pisca"
+          >
+            Lanterna e Pisca (24)
+          </button>
+
+          <button
+            class="pill-category px-3 py-1 rounded-full text-xs transition-all cursor-pointer ${
+              filters.subCategory === 'Farol e Milha' ? activePillCls : inactivePillCls
+            }"
+            data-macro="soquete"
+            data-sub="Farol e Milha"
+          >
+            Farol e Milha (9)
+          </button>
+
+          <button
+            class="pill-category px-3 py-1 rounded-full text-xs transition-all cursor-pointer ${
+              filters.subCategory === 'Painel e Instrumentos' ? activePillCls : inactivePillCls
+            }"
+            data-macro="soquete"
+            data-sub="Painel e Instrumentos"
+          >
+            Painel e Instrumentos (17)
+          </button>
+
+          <button
+            class="pill-category px-3 py-1 rounded-full text-xs transition-all cursor-pointer ${
+              filters.subCategory === 'Luz de Placa' ? activePillCls : inactivePillCls
+            }"
+            data-macro="soquete"
+            data-sub="Luz de Placa"
+          >
+            Luz de Placa (6)
+          </button>
+
+          <button
+            class="pill-category px-3 py-1 rounded-full text-xs transition-all cursor-pointer ${
+              filters.subCategory === 'Soquetes Universais e Diversos' ? activePillCls : inactivePillCls
+            }"
+            data-macro="soquete"
+            data-sub="Soquetes Universais e Diversos"
+          >
+            Soquetes Universais (57)
+          </button>
+
+          <!-- Separador Vertical -->
+          <span class="text-slate-300 dark:text-slate-700 font-light mx-1 hidden sm:inline">|</span>
+
+          <!-- Dropdown de Montadora -->
+          <div class="flex items-center gap-1.5 shrink-0">
+            <span class="text-[10px] uppercase font-black tracking-wider text-slate-400 dark:text-slate-500">
+              MONTADORA:
+            </span>
+            <select
+              id="select-filter-make"
+              class="bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-xs font-semibold rounded-xl px-2.5 py-1 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm cursor-pointer transition-colors"
             >
-              ${icons.socket("w-4 h-4")}
-              <span>Soquetes Diversos</span>
-              <span class="px-2 py-0.5 rounded-full text-[10px] font-mono ${isSoquete ? 'bg-amber-700 text-white' : 'bg-slate-100 dark:bg-slate-800'} font-black">${counts.soquete}</span>
-            </button>
+              <option value="all" ${filters.make === 'all' || !filters.make ? 'selected' : ''}>Todas as Montadoras</option>
+              <option value="VW" ${filters.make === 'VW' ? 'selected' : ''}>VW (81)</option>
+              <option value="Fiat" ${filters.make === 'Fiat' ? 'selected' : ''}>Fiat (22)</option>
+              <option value="GM" ${filters.make === 'GM' ? 'selected' : ''}>GM (18)</option>
+              <option value="Ford" ${filters.make === 'Ford' ? 'selected' : ''}>Ford (4)</option>
+              <option value="Honda" ${filters.make === 'Honda' ? 'selected' : ''}>Honda (2)</option>
+              <option value="Toyota" ${filters.make === 'Toyota' ? 'selected' : ''}>Toyota (1)</option>
+              <option value="Universal" ${filters.make === 'Universal' ? 'selected' : ''}>Universal (23)</option>
+            </select>
+          </div>
+
+          <!-- Dropdown de Especificações Técnicas -->
+          <div class="flex items-center gap-1.5 shrink-0">
+            <span class="text-[10px] uppercase font-black tracking-wider text-slate-400 dark:text-slate-500">
+              ESPECIFICAÇÕES:
+            </span>
+            <select
+              id="select-filter-spec"
+              class="bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-xs font-semibold rounded-xl px-2.5 py-1 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm cursor-pointer transition-colors"
+            >
+              <option value="all" ${currentSpecVal === 'all' ? 'selected' : ''}>Todas as Especificações</option>
+              <optgroup label="Placas de Circuito de Lanterna">
+                <option value="side:LD" ${currentSpecVal === 'side:LD' ? 'selected' : ''}>LD (Lado Direito / Passageiro)</option>
+                <option value="side:LE" ${currentSpecVal === 'side:LE' ? 'selected' : ''}>LE (Lado Esquerdo / Motorista)</option>
+                <option value="side:LD/LE (Ambos)" ${currentSpecVal === 'side:LD/LE (Ambos)' ? 'selected' : ''}>Par / Ambos (LD/LE)</option>
+                <option value="sys:Arteb" ${currentSpecVal === 'sys:Arteb' ? 'selected' : ''}>Sistema Lanterna Arteb</option>
+                <option value="sys:Cibié" ${currentSpecVal === 'sys:Cibié' ? 'selected' : ''}>Sistema Lanterna Cibié</option>
+              </optgroup>
+              <optgroup label="Soquetes Automotivos">
+                <option value="poles:1" ${currentSpecVal === 'poles:1' ? 'selected' : ''}>1 Polo (BA15s / 1141)</option>
+                <option value="poles:2" ${currentSpecVal === 'poles:2' ? 'selected' : ''}>2 Polos (BAY15d / 1034)</option>
+                <option value="lamp:H7" ${currentSpecVal === 'lamp:H7' ? 'selected' : ''}>Lâmpada H7</option>
+                <option value="lamp:H4" ${currentSpecVal === 'lamp:H4' ? 'selected' : ''}>Lâmpada H4</option>
+                <option value="lamp:T10" ${currentSpecVal === 'lamp:T10' ? 'selected' : ''}>Pingo T10 (Esmagadinha)</option>
+                <option value="lamp:T5" ${currentSpecVal === 'lamp:T5' ? 'selected' : ''}>Painel T5 (Pinguinho)</option>
+                <option value="lamp:Porcelana" ${currentSpecVal === 'lamp:Porcelana' ? 'selected' : ''}>Base Porcelana Cerâmica</option>
+                <option value="lamp:Pino Desencontrado" ${currentSpecVal === 'lamp:Pino Desencontrado' ? 'selected' : ''}>Pino Desencontrado (150° / Doido)</option>
+              </optgroup>
+            </select>
           </div>
 
           <!-- Botão Limpar Filtros Ativos -->
           ${
             hasActiveFilters
-              ? `<button id="btn-reset-filters" class="px-3 py-1.5 text-xs font-black text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/50 border border-red-200 dark:border-red-900 rounded-xl flex items-center gap-1.5 transition-all shadow-sm">
+              ? `<button
+                  id="btn-reset-filters"
+                  class="px-3 py-1 text-xs font-bold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/50 border border-red-200 dark:border-red-900 rounded-full flex items-center gap-1 transition-all shadow-sm shrink-0"
+                  title="Limpar todos os filtros rápidos"
+                >
                   ${icons.x("w-3.5 h-3.5")}
                   <span>Limpar Filtros</span>
                 </button>`
               : ''
           }
-        </div>
-
-        <!-- 2. Linha Inferior: Filtros Técnicos Estruturados SEM Barra de Rolagem (Wrap Natural) -->
-        <div class="flex flex-wrap items-center gap-3 pt-0.5">
-          
-          <!-- SEÇÃO A: FILTROS DE PLACAS DE CIRCUITO (Lado & Sistema) -->
-          ${
-            isCircuito || isAll
-              ? `
-              <!-- Grupo Lado LD / LE -->
-              <div class="flex items-center gap-1 bg-white dark:bg-slate-800/90 px-2 py-1 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                <span class="text-[10px] uppercase font-black tracking-wider text-slate-400 dark:text-slate-500 pr-1">Lado:</span>
-                <button
-                  class="pill-side px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${filters.circuitSide === 'LD' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'}"
-                  data-side="LD"
-                >LD (Direito)</button>
-                <button
-                  class="pill-side px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${filters.circuitSide === 'LE' ? 'bg-amber-600 text-white shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'}"
-                  data-side="LE"
-                >LE (Esquerdo)</button>
-                <button
-                  class="pill-side px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${filters.circuitSide === 'LD/LE (Ambos)' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'}"
-                  data-side="LD/LE (Ambos)"
-                >Par/Ambos</button>
-              </div>
-
-              <!-- Grupo Sistema da Lanterna -->
-              <div class="flex items-center gap-1 bg-white dark:bg-slate-800/90 px-2 py-1 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                <span class="text-[10px] uppercase font-black tracking-wider text-slate-400 dark:text-slate-500 pr-1">Lanterna:</span>
-                <button
-                  class="pill-system px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${filters.circuitSystem === 'Arteb' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'}"
-                  data-system="Arteb"
-                >Arteb</button>
-                <button
-                  class="pill-system px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${filters.circuitSystem === 'Cibié' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'}"
-                  data-system="Cibié"
-                >Cibié</button>
-              </div>
-              `
-              : ''
-          }
-
-          <!-- SEÇÃO B: FILTROS DE SOQUETES (Polos & Lâmpadas) -->
-          ${
-            isSoquete || isAll
-              ? `
-              <!-- Grupo Polos -->
-              <div class="flex items-center gap-1 bg-white dark:bg-slate-800/90 px-2 py-1 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                <span class="text-[10px] uppercase font-black tracking-wider text-slate-400 dark:text-slate-500 pr-1">Polos:</span>
-                <button
-                  class="pill-poles px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${filters.socketPoles === 1 ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'}"
-                  data-poles="1"
-                >1 Polo</button>
-                <button
-                  class="pill-poles px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${filters.socketPoles === 2 ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'}"
-                  data-poles="2"
-                >2 Polos</button>
-              </div>
-
-              <!-- Grupo Lâmpada / Base -->
-              <div class="flex items-center gap-1 bg-white dark:bg-slate-800/90 px-2 py-1 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex-wrap">
-                <span class="text-[10px] uppercase font-black tracking-wider text-slate-400 dark:text-slate-500 pr-1">Lâmpada:</span>
-                <button
-                  class="pill-lamp px-2 py-1 rounded-lg text-xs font-bold transition-all ${filters.socketLamp === 'H7' ? 'bg-amber-600 text-white shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'}"
-                  data-lamp="H7"
-                >H7</button>
-                <button
-                  class="pill-lamp px-2 py-1 rounded-lg text-xs font-bold transition-all ${filters.socketLamp === 'H4' ? 'bg-amber-600 text-white shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'}"
-                  data-lamp="H4"
-                >H4</button>
-                <button
-                  class="pill-lamp px-2 py-1 rounded-lg text-xs font-bold transition-all ${filters.socketLamp === 'T10' ? 'bg-amber-600 text-white shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'}"
-                  data-lamp="T10"
-                >Pingo T10</button>
-                <button
-                  class="pill-lamp px-2 py-1 rounded-lg text-xs font-bold transition-all ${filters.socketLamp === 'T5' ? 'bg-amber-600 text-white shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'}"
-                  data-lamp="T5"
-                >Painel T5</button>
-                <button
-                  class="pill-lamp px-2 py-1 rounded-lg text-xs font-bold transition-all ${filters.socketLamp === 'Porcelana' ? 'bg-amber-600 text-white shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'}"
-                  data-lamp="Porcelana"
-                >Porcelana</button>
-                <button
-                  class="pill-lamp px-2 py-1 rounded-lg text-xs font-bold transition-all ${filters.socketLamp === 'Pino Desencontrado' ? 'bg-amber-600 text-white shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'}"
-                  data-lamp="Pino Desencontrado"
-                >Pino Desencontrado</button>
-              </div>
-              `
-              : ''
-          }
-
-          <!-- SEÇÃO C: FILTRO DE MONTADORA -->
-          <div class="flex items-center gap-1 bg-white dark:bg-slate-800/90 px-2 py-1 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex-wrap">
-            <span class="text-[10px] uppercase font-black tracking-wider text-slate-400 dark:text-slate-500 pr-1">Montadora:</span>
-            ${['VW', 'Fiat', 'GM', 'Ford', 'Honda', 'Universal'].map(make => `
-              <button
-                class="pill-make px-2 py-1 rounded-lg text-xs font-bold transition-all ${filters.make === make ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'}"
-                data-make="${make}"
-              >${make}</button>
-            `).join('')}
-          </div>
 
         </div>
 
@@ -193,50 +228,32 @@ export function renderFilters(
     </div>
   `;
 
-  // Listeners das Abas Principais
-  container.querySelector('#tab-macro-all')?.addEventListener('click', () => callbacks.onMacroChange('all'));
-  container.querySelector('#tab-macro-circuito')?.addEventListener('click', () => callbacks.onMacroChange('circuito'));
-  container.querySelector('#tab-macro-soquete')?.addEventListener('click', () => callbacks.onMacroChange('soquete'));
-
-  container.querySelector('#btn-reset-filters')?.addEventListener('click', () => callbacks.onResetFilters());
-
-  // Listeners dos pills de Lado
-  container.querySelectorAll('.pill-side').forEach(btn => {
+  // Listener para botões de categoria e subcategoria
+  container.querySelectorAll('.pill-category').forEach((btn) => {
     btn.addEventListener('click', (e) => {
-      const side = (e.currentTarget as HTMLElement).dataset.side as any;
-      callbacks.onCircuitSideChange(filters.circuitSide === side ? 'all' : side);
+      const el = e.currentTarget as HTMLElement;
+      const macro = el.dataset.macro as 'all' | MacroCategory;
+      const sub = el.dataset.sub || 'all';
+      callbacks.onCategoryPillClick(macro, sub);
     });
   });
 
-  // Listeners dos pills de Sistema Lanterna
-  container.querySelectorAll('.pill-system').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const system = (e.currentTarget as HTMLElement).dataset.system as any;
-      callbacks.onCircuitSystemChange(filters.circuitSystem === system ? 'all' : system);
-    });
+  // Listener para o select de Montadora
+  const selectMake = container.querySelector('#select-filter-make') as HTMLSelectElement | null;
+  selectMake?.addEventListener('change', (e) => {
+    const val = (e.target as HTMLSelectElement).value;
+    callbacks.onMakeChange(val);
   });
 
-  // Listeners dos pills de Polos
-  container.querySelectorAll('.pill-poles').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const poles = parseInt((e.currentTarget as HTMLElement).dataset.poles || '0', 10) as 1 | 2;
-      callbacks.onSocketPolesChange(filters.socketPoles === poles ? 'all' : poles);
-    });
+  // Listener para o select de Especificações
+  const selectSpec = container.querySelector('#select-filter-spec') as HTMLSelectElement | null;
+  selectSpec?.addEventListener('change', (e) => {
+    const val = (e.target as HTMLSelectElement).value;
+    callbacks.onSpecChange(val);
   });
 
-  // Listeners dos pills de Lâmpada
-  container.querySelectorAll('.pill-lamp').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const lamp = (e.currentTarget as HTMLElement).dataset.lamp as any;
-      callbacks.onSocketLampChange(filters.socketLamp === lamp ? 'all' : lamp);
-    });
-  });
-
-  // Listeners dos pills de Montadora
-  container.querySelectorAll('.pill-make').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const make = (e.currentTarget as HTMLElement).dataset.make || '';
-      callbacks.onMakeChange(filters.make === make ? 'all' : make);
-    });
+  // Listener para o botão de reset
+  container.querySelector('#btn-reset-filters')?.addEventListener('click', () => {
+    callbacks.onResetFilters();
   });
 }

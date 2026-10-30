@@ -30,6 +30,7 @@ class App {
   private filters: FilterState = {
     searchQuery: '',
     macroCategory: 'all',
+    subCategory: 'all',
     circuitSide: 'all',
     circuitSystem: 'all',
     socketPoles: 'all',
@@ -204,8 +205,8 @@ class App {
 
   private renderFiltersComponent(): void {
     const totalCount = this.allItems.length;
-    const circuitoCount = this.allItems.filter(it => it.macroCategory === 'circuito').length;
-    const soqueteCount = this.allItems.filter(it => it.macroCategory === 'soquete').length;
+    const circuitoCount = this.allItems.filter((it) => it.macroCategory === 'circuito').length;
+    const soqueteCount = this.allItems.filter((it) => it.macroCategory === 'soquete').length;
 
     renderFilters(
       this.filtersRoot,
@@ -214,30 +215,62 @@ class App {
       {
         onMacroChange: (macro: 'all' | MacroCategory) => {
           this.filters.macroCategory = macro;
+          this.filters.subCategory = 'all';
           this.runSearchAndRender();
         },
-        onCircuitSideChange: (side) => {
-          this.filters.circuitSide = side;
+        onCategoryPillClick: (macro: 'all' | MacroCategory, sub: string) => {
+          if (macro === 'all' && sub === 'all') {
+            this.filters.macroCategory = 'all';
+            this.filters.subCategory = 'all';
+          } else if (sub !== 'all') {
+            if (this.filters.subCategory === sub) {
+              this.filters.subCategory = 'all';
+              this.filters.macroCategory = 'all';
+            } else {
+              this.filters.subCategory = sub;
+              this.filters.macroCategory = macro;
+            }
+          } else {
+            if (this.filters.macroCategory === macro && (!this.filters.subCategory || this.filters.subCategory === 'all')) {
+              this.filters.macroCategory = 'all';
+            } else {
+              this.filters.macroCategory = macro;
+              this.filters.subCategory = 'all';
+            }
+          }
           this.runSearchAndRender();
         },
-        onCircuitSystemChange: (sys) => {
-          this.filters.circuitSystem = sys;
+        onSpecChange: (specKey: string) => {
+          if (specKey === 'all') {
+            this.filters.circuitSide = 'all';
+            this.filters.circuitSystem = 'all';
+            this.filters.socketPoles = 'all';
+            this.filters.socketLamp = 'all';
+          } else if (specKey.startsWith('side:')) {
+            this.filters.circuitSide = specKey.replace('side:', '') as any;
+            this.filters.circuitSystem = 'all';
+            this.filters.socketPoles = 'all';
+            this.filters.socketLamp = 'all';
+          } else if (specKey.startsWith('sys:')) {
+            this.filters.circuitSystem = specKey.replace('sys:', '') as any;
+            this.filters.circuitSide = 'all';
+            this.filters.socketPoles = 'all';
+            this.filters.socketLamp = 'all';
+          } else if (specKey.startsWith('poles:')) {
+            this.filters.socketPoles = parseInt(specKey.replace('poles:', ''), 10) as any;
+            this.filters.circuitSide = 'all';
+            this.filters.circuitSystem = 'all';
+            this.filters.socketLamp = 'all';
+          } else if (specKey.startsWith('lamp:')) {
+            this.filters.socketLamp = specKey.replace('lamp:', '') as any;
+            this.filters.circuitSide = 'all';
+            this.filters.circuitSystem = 'all';
+            this.filters.socketPoles = 'all';
+          }
           this.runSearchAndRender();
         },
-        onSocketPolesChange: (poles) => {
-          this.filters.socketPoles = poles;
-          this.runSearchAndRender();
-        },
-        onSocketLampChange: (lamp) => {
-          this.filters.socketLamp = lamp;
-          this.runSearchAndRender();
-        },
-        onMakeChange: (make) => {
-          this.filters.make = make === this.filters.make ? 'all' : make;
-          this.runSearchAndRender();
-        },
-        onHasPhotoChange: (status) => {
-          this.filters.hasPhoto = status;
+        onMakeChange: (make: string) => {
+          this.filters.make = make;
           this.runSearchAndRender();
         },
         onResetFilters: () => {
@@ -249,6 +282,8 @@ class App {
 
   private resetAllFilters(): void {
     this.filters.searchQuery = '';
+    this.filters.macroCategory = 'all';
+    this.filters.subCategory = 'all';
     this.filters.circuitSide = 'all';
     this.filters.circuitSystem = 'all';
     this.filters.socketPoles = 'all';

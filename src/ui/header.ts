@@ -1,5 +1,7 @@
-// Header do Catálogo de Balcão com Omnibox Sub-50ms e Controles
-// Preservação Estrita de Foco (Zero perda de foco ao digitar), Botão Limpar e Privacidade
+// Header do Catálogo de Balcão - Layout Profissional Padrão Ouro
+// Linha 1: Branding + Controles (Grade/Mural/Caixas, Privacidade, Tema, Backup, + Cadastrar)
+// Linha 2: Barra de Busca Full-Width com borda azul e placeholder completo
+// Linha 3: EXEMPLOS RÁPIDOS com pills clicáveis e status de busca
 
 import { FilterState, ViewMode } from '../types/catalog';
 import { icons } from './icons';
@@ -12,6 +14,7 @@ export interface HeaderCallbacks {
   onNewProduct: () => void;
   onOpenBoxMap: () => void;
   onOpenBackup: () => void;
+  onExampleClick?: (query: string) => void;
 }
 
 export function renderHeader(
@@ -78,30 +81,22 @@ export function renderHeader(
 
     // Botão Ocultar / Mostrar Preços
     const btnPrices = container.querySelector('#btn-toggle-prices') as HTMLElement | null;
-    const btnPricesMob = container.querySelector('#btn-prices-mobile') as HTMLElement | null;
     if (btnPrices) {
       if (filters.hidePrices) {
-        btnPrices.className = "px-3 py-1.5 rounded-xl border border-red-400 dark:border-red-700 bg-red-600 text-white hover:bg-red-700 font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm";
-        btnPrices.innerHTML = `${icons.eyeOff("w-4 h-4 text-white")}<span>Preços Ocultos</span>`;
+        btnPrices.className = "p-2 rounded-xl border border-red-300 dark:border-red-800 bg-red-600 text-white hover:bg-red-700 transition-all shadow-sm";
+        btnPrices.innerHTML = icons.eyeOff("w-5 h-5 text-white");
         btnPrices.title = "Preços Ocultos na Tela (Modo Privacidade Ativo). Clique para exibir.";
       } else {
-        btnPrices.className = "px-3 py-1.5 rounded-xl border border-emerald-300 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm";
-        btnPrices.innerHTML = `${icons.eye("w-4 h-4 text-emerald-600 dark:text-emerald-400")}<span>Preços Visíveis</span>`;
+        btnPrices.className = "p-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shadow-sm";
+        btnPrices.innerHTML = icons.eye("w-5 h-5 text-emerald-600 dark:text-emerald-400");
         btnPrices.title = "Preços Visíveis na Tela. Clique para ocultar (Privacidade de Balcão).";
       }
-    }
-    if (btnPricesMob) {
-      btnPricesMob.innerHTML = filters.hidePrices
-        ? icons.eyeOff("w-5 h-5 text-red-500")
-        : icons.eye("w-5 h-5 text-emerald-500");
     }
 
     // Botão Tema Claro / Escuro
     const btnTheme = container.querySelector('#btn-toggle-theme') as HTMLElement | null;
-    const btnThemeMob = container.querySelector('#btn-theme-mobile') as HTMLElement | null;
     const themeIcon = isDark ? icons.sun("w-5 h-5 text-amber-400") : icons.moon("w-5 h-5");
     if (btnTheme) btnTheme.innerHTML = themeIcon;
-    if (btnThemeMob) btnThemeMob.innerHTML = themeIcon;
 
     return;
   }
@@ -110,93 +105,40 @@ export function renderHeader(
   // CRIAÇÃO INICIAL DO DOM DO HEADER (EXECUTADO UMA ÚNICA VEZ)
   // ------------------------------------------------------------------------
   container.innerHTML = `
-    <header class="sticky top-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+    <header class="w-full">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 pb-2 space-y-2.5">
+        
+        <!-- LINHA 1: BRANDING (ESQUERDA) + CONTROLES DE BALCÃO (DIREITA) -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           
-          <!-- Logo e Identificação do Balcão -->
-          <div class="flex items-center justify-between shrink-0">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-xl bg-blue-600 dark:bg-blue-500 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
-                ${icons.circuit("w-6 h-6")}
-              </div>
-              <div>
+          <!-- Identificação Oficial do Balcão -->
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-500/20 shrink-0">
+              ${icons.circuit("w-6 h-6")}
+            </div>
+            <div>
+              <div class="flex items-center gap-2 flex-wrap">
                 <h1 class="text-lg font-black tracking-tight text-slate-900 dark:text-white leading-tight">
                   CATÁLOGO DE BALCÃO
                 </h1>
-                <p class="text-xs font-semibold uppercase tracking-wider text-blue-600 dark:text-blue-400">
-                  Placas de Circuito & Soquetes Automotivos
-                </p>
-              </div>
-            </div>
-
-            <!-- Controles Rápidos Mobile -->
-            <div class="flex items-center gap-1 lg:hidden">
-              <button id="btn-theme-mobile" class="p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800" title="Alternar Modo Claro/Escuro">
-                ${isDark ? icons.sun("w-5 h-5 text-amber-400") : icons.moon("w-5 h-5")}
-              </button>
-              <button id="btn-prices-mobile" class="p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800" title="Privacidade Balcão">
-                ${filters.hidePrices ? icons.eyeOff("w-5 h-5 text-red-500") : icons.eye("w-5 h-5 text-emerald-500")}
-              </button>
-            </div>
-          </div>
-
-          <!-- Omnibox de Busca Instantânea (< 50ms) -->
-          <div class="flex-1 min-w-0 max-w-3xl mx-auto w-full">
-            <div class="relative flex items-center">
-              <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
-                ${icons.search("w-5 h-5")}
-              </div>
-              <input
-                type="text"
-                id="omnibox-input"
-                class="block w-full pl-11 pr-11 py-2.5 bg-slate-100 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 font-medium focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm transition-all shadow-inner"
-                placeholder="Buscar por Caixa (ex: 05, cx 12), Código (ETE-7490, DP-3015), Lado (LD/LE) ou Carro..."
-                title="Buscar por Caixa (ex: 05, cx 12), Código (ETE-7490, DP-3015), Lado (LD/LE) ou Carro..."
-                value="${filters.searchQuery}"
-                autocomplete="off"
-                spellcheck="false"
-              />
-              <div class="absolute inset-y-0 right-0 pr-2 flex items-center gap-1">
-                <!-- Botão Limpar Texto (Visível quando há texto) -->
-                <button
-                  type="button"
-                  id="btn-clear-search"
-                  class="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors ${filters.searchQuery ? '' : 'hidden'}"
-                  title="Limpar busca (Esc)"
-                >
-                  ${icons.x("w-4 h-4")}
-                </button>
-                <!-- Dica Tecla '/' -->
-                <span
-                  id="slash-badge"
-                  class="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-mono font-semibold bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400 rounded ${filters.searchQuery ? 'hidden' : ''}"
-                >/</span>
-              </div>
-            </div>
-            <!-- Status de Busca, Dica de Pesquisa e Latência -->
-            <div class="flex items-center justify-between px-1 pt-1 text-[11px] text-slate-500 dark:text-slate-400">
-              <span class="flex items-center gap-1.5 truncate">
-                <span><strong id="header-results-count" class="font-bold text-slate-900 dark:text-slate-100">${totalResults}</strong> peças</span>
-                <span class="text-slate-300 dark:text-slate-700 hidden sm:inline">•</span>
-                <span class="hidden md:inline text-slate-500 dark:text-slate-400 truncate">
-                  Exemplos: <code class="font-mono text-blue-600 dark:text-blue-400 font-bold">01</code>, <code class="font-mono text-blue-600 dark:text-blue-400 font-bold">cx 73</code>, <code class="font-mono text-blue-600 dark:text-blue-400 font-bold">ete-7491</code>, <code class="font-mono text-blue-600 dark:text-blue-400 font-bold">gol bola ld</code>, <code class="font-mono text-blue-600 dark:text-blue-400 font-bold">h7</code>
+                <span class="px-2.5 py-0.5 rounded-lg text-xs font-black uppercase tracking-wider bg-blue-100 text-blue-700 dark:bg-blue-900/60 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                  PLACAS DE CIRCUITO & SOQUETES
                 </span>
-              </span>
-              <span id="header-latency-ms" class="font-mono text-emerald-600 dark:text-emerald-400 shrink-0 ml-2">
-                latência: ${latencyMs}ms
-              </span>
+              </div>
+              <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                Localizador Visual de Caixas Físicas • Busca Instantânea Sub-50ms • Multi-Ângulos WebP
+              </p>
             </div>
           </div>
 
-          <!-- Ações e Modos de Visualização Desktop -->
-          <div class="hidden lg:flex items-center gap-2 shrink-0">
+          <!-- Controles de Visualização, Privacidade, Tema e Cadastro -->
+          <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap justify-end">
             
-            <!-- Alternador de Modos de Visão -->
-            <div class="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
+            <!-- Grupo Alternador de Modos (Grade | Mural | Caixas) -->
+            <div class="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 shadow-inner">
               <button
                 id="btn-view-grid"
-                class="px-2.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
+                class="px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
                   filters.viewMode === 'grid'
                     ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -209,7 +151,7 @@ export function renderHeader(
               
               <button
                 id="btn-view-mural"
-                class="px-2.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
+                class="px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
                   filters.viewMode === 'mural'
                     ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -222,7 +164,7 @@ export function renderHeader(
 
               <button
                 id="btn-view-boxmap"
-                class="px-2.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
+                class="px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
                   filters.viewMode === 'boxmap'
                     ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -234,54 +176,120 @@ export function renderHeader(
               </button>
             </div>
 
-            <!-- Ocultar Preços de Balcão (Privacidade) -->
+            <!-- Botão Ocultar / Mostrar Preços (Privacidade) -->
             <button
               id="btn-toggle-prices"
-              class="px-3 py-1.5 rounded-xl border font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm ${
+              class="p-2 rounded-xl border transition-all shadow-sm ${
                 filters.hidePrices
                   ? 'border-red-400 dark:border-red-700 bg-red-600 text-white hover:bg-red-700'
-                  : 'border-emerald-300 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/60'
+                  : 'border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
               }"
               title="${filters.hidePrices ? 'Preços Ocultos na Tela (Privacidade Ativa). Clique para exibir.' : 'Preços Visíveis. Clique para ocultar (Privacidade).'}"
             >
               ${
                 filters.hidePrices
-                  ? `${icons.eyeOff("w-4 h-4 text-white")}<span>Preços Ocultos</span>`
-                  : `${icons.eye("w-4 h-4 text-emerald-600 dark:text-emerald-400")}<span>Preços Visíveis</span>`
+                  ? icons.eyeOff("w-5 h-5 text-white")
+                  : icons.eye("w-5 h-5 text-emerald-600 dark:text-emerald-400")
               }
             </button>
 
-            <!-- Daylight Counter Mode vs Dark Mode -->
+            <!-- Botão Tema Claro / Escuro -->
             <button
               id="btn-toggle-theme"
-              class="p-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              class="p-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shadow-sm"
               title="${isDark ? 'Ativar Daylight Counter Mode (Alto Contraste)' : 'Ativar Dark Mode'}"
             >
               ${isDark ? icons.sun("w-5 h-5 text-amber-400") : icons.moon("w-5 h-5")}
             </button>
 
-            <!-- Backup & Restore -->
+            <!-- Botão Backup / Sincronização SHA-256 -->
             <button
               id="btn-backup"
-              class="p-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-              title="Backup & Sincronização SHA-256"
+              class="p-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shadow-sm"
+              title="Backup, Restauração e Auditoria SHA-256"
             >
-              ${icons.download("w-5 h-5")}
+              ${icons.shield("w-5 h-5")}
             </button>
 
-            <!-- Cadastrar Novo Produto -->
+            <!-- Botão Cadastrar Peça -->
             <button
               id="btn-new-product"
-              class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl flex items-center gap-1.5 shadow-md shadow-blue-600/20 transition-all active:scale-95"
+              class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm rounded-xl flex items-center gap-1.5 shadow-md shadow-blue-600/25 active:scale-95 transition-all shrink-0"
               title="Cadastrar Nova Peça no Balcão"
             >
               ${icons.plus("w-4 h-4")}
-              <span>Nova Peça</span>
+              <span>+ Cadastrar Peça</span>
             </button>
 
           </div>
 
         </div>
+
+        <!-- LINHA 2: BARRA DE BUSCA OMNIBOX FULL-WIDTH COM BORDA AZUL -->
+        <div class="relative w-full">
+          <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
+            ${icons.search("w-5 h-5")}
+          </div>
+          <input
+            type="text"
+            id="omnibox-input"
+            class="block w-full pl-12 pr-12 py-3 bg-white dark:bg-slate-800/90 border-2 border-blue-500 rounded-2xl text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-sm font-medium focus:outline-none focus:ring-4 focus:ring-blue-500/20 shadow-sm transition-all"
+            placeholder="Digite o Nº da Caixa (ex: 01, 73, 26), Código (ETE-7491, DP-3111, DP-2001, DEP2272) ou Aplicação/Veículo (ex: gol bola ld, palio le, h7 porcelana, uno cibie)..."
+            title="Digite o Nº da Caixa (ex: 01, 73, 26), Código (ETE-7491, DP-3111, DP-2001, DEP2272) ou Aplicação/Veículo (ex: gol bola ld, palio le, h7 porcelana, uno cibie)..."
+            value="${filters.searchQuery}"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <div class="absolute inset-y-0 right-0 pr-3 flex items-center gap-1">
+            <!-- Botão Limpar Texto (Visível quando há texto) -->
+            <button
+              type="button"
+              id="btn-clear-search"
+              class="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors ${filters.searchQuery ? '' : 'hidden'}"
+              title="Limpar busca (Esc)"
+            >
+              ${icons.x("w-4 h-4")}
+            </button>
+            <!-- Dica Tecla '/' -->
+            <span
+              id="slash-badge"
+              class="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-mono font-semibold bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400 rounded ${filters.searchQuery ? 'hidden' : ''}"
+            >/</span>
+          </div>
+        </div>
+
+        <!-- LINHA 3: EXEMPLOS RÁPIDOS CLICÁVEIS + STATUS E LATÊNCIA -->
+        <div class="flex items-center justify-between gap-3 text-xs flex-wrap">
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <span class="text-[10px] uppercase font-black tracking-wider text-slate-400 dark:text-slate-500 shrink-0">
+              EXEMPLOS RÁPIDOS:
+            </span>
+            <div class="flex items-center gap-1 flex-wrap">
+              <button class="btn-quick-example px-2.5 py-0.5 rounded-lg text-xs font-mono font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 border border-slate-200 dark:border-slate-700 transition-colors" data-query="01">CX 01</button>
+              <button class="btn-quick-example px-2.5 py-0.5 rounded-lg text-xs font-mono font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 border border-slate-200 dark:border-slate-700 transition-colors" data-query="73">CX 73</button>
+              <button class="btn-quick-example px-2.5 py-0.5 rounded-lg text-xs font-mono font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 border border-slate-200 dark:border-slate-700 transition-colors" data-query="ETE-7491">ETE-7491</button>
+              <button class="btn-quick-example px-2.5 py-0.5 rounded-lg text-xs font-mono font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 border border-slate-200 dark:border-slate-700 transition-colors" data-query="DP-3111">DP-3111</button>
+              <button class="btn-quick-example px-2.5 py-0.5 rounded-lg text-xs font-mono font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 border border-slate-200 dark:border-slate-700 transition-colors" data-query="DP2001">DP2001</button>
+              <button class="btn-quick-example px-2.5 py-0.5 rounded-lg text-xs font-mono font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 border border-slate-200 dark:border-slate-700 transition-colors" data-query="DEP2272">DEP2272</button>
+              <button class="btn-quick-example px-2.5 py-0.5 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 border border-slate-200 dark:border-slate-700 transition-colors" data-query="gol bola ld">Gol Bola LD</button>
+              <button class="btn-quick-example px-2.5 py-0.5 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 border border-slate-200 dark:border-slate-700 transition-colors" data-query="celta le">Celta LE</button>
+              <button class="btn-quick-example px-2.5 py-0.5 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 border border-slate-200 dark:border-slate-700 transition-colors" data-query="h7 porcelana">H7 Porcelana</button>
+              <button class="btn-quick-example px-2.5 py-0.5 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 border border-slate-200 dark:border-slate-700 transition-colors" data-query="pino doido">Pino Doido</button>
+            </div>
+          </div>
+
+          <!-- Total de Peças & Latência -->
+          <div class="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400 font-medium shrink-0 ml-auto">
+            <span>
+              <strong id="header-results-count" class="font-bold text-slate-900 dark:text-slate-100">${totalResults}</strong> peças localizadas
+            </span>
+            <span>•</span>
+            <span id="header-latency-ms" class="font-mono text-emerald-600 dark:text-emerald-400">
+              latência: ${latencyMs}ms
+            </span>
+          </div>
+        </div>
+
       </div>
     </header>
   `;
@@ -333,15 +341,28 @@ export function renderHeader(
     });
   }
 
+  // Exemplos rápidos clicáveis
+  container.querySelectorAll('.btn-quick-example').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const q = (btn as HTMLElement).dataset.query || '';
+      if (omnibox) {
+        omnibox.value = q;
+        omnibox.focus();
+      }
+      if (btnClear && slashBadge) {
+        btnClear.classList.remove('hidden');
+        slashBadge.classList.add('hidden');
+      }
+      callbacks.onSearchChange(q);
+    });
+  });
+
   container.querySelector('#btn-view-grid')?.addEventListener('click', () => callbacks.onViewModeChange('grid'));
   container.querySelector('#btn-view-mural')?.addEventListener('click', () => callbacks.onViewModeChange('mural'));
   container.querySelector('#btn-view-boxmap')?.addEventListener('click', () => callbacks.onOpenBoxMap());
 
   container.querySelector('#btn-toggle-theme')?.addEventListener('click', () => callbacks.onThemeToggle());
-  container.querySelector('#btn-theme-mobile')?.addEventListener('click', () => callbacks.onThemeToggle());
-
   container.querySelector('#btn-toggle-prices')?.addEventListener('click', () => callbacks.onHidePricesToggle());
-  container.querySelector('#btn-prices-mobile')?.addEventListener('click', () => callbacks.onHidePricesToggle());
 
   container.querySelector('#btn-new-product')?.addEventListener('click', () => callbacks.onNewProduct());
   container.querySelector('#btn-backup')?.addEventListener('click', () => callbacks.onOpenBackup());
