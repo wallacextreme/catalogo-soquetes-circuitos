@@ -297,6 +297,13 @@ class App {
       onCopyCode: (code: string) => {
         navigator.clipboard.writeText(code).catch(() => {});
       },
+      onUpdatePrice: async (item: CatalogItem, newPrice: number) => {
+        item.price = newPrice;
+        await saveItem(item, true);
+        const idx = this.allItems.findIndex(it => it.id === item.id);
+        if (idx >= 0) this.allItems[idx] = item;
+        this.runSearchAndRender();
+      },
     };
 
     if (this.filters.viewMode === 'mural') {

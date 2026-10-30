@@ -56,3 +56,4 @@ describe('Segurança, Integridade e Conformidade Padrão Ouro', () => {
     expect(seedData.metadata.pixelAuditPass).toBe(152);
   });
 });
+

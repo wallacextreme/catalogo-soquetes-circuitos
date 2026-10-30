@@ -192,3 +192,4 @@ export const icons = {
       <rect width="12" height="8" x="6" y="14"></rect>
     </svg>`
 };
+

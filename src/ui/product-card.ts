@@ -7,6 +7,7 @@ export interface CardCallbacks {
   onEditProduct: (item: CatalogItem) => void;
   onQuickUpdateBox: (item: CatalogItem, newBox: string) => void;
   onCopyCode: (code: string) => void;
+  onUpdatePrice?: (item: CatalogItem, newPrice: number) => void;
 }
 
 export function renderProductCard(
@@ -191,14 +192,22 @@ export function renderProductCard(
 
       <!-- Rodapé do Card: Preço e Botão de Edição/+ Foto -->
       <div class="pt-2 border-t border-slate-100 dark:border-slate-700/60 flex items-center justify-between">
-        <!-- Preço Opcional -->
+        <!-- Preço Opcional com Modo Privacidade Ativo -->
         <div>
           ${
-            !hidePrices && item.price !== null && item.price !== undefined
-              ? `<div class="font-mono text-sm font-black text-emerald-600 dark:text-emerald-400">
-                  R$ ${item.price.toFixed(2).replace('.', ',')}
+            hidePrices
+              ? `<div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/60 text-red-600 dark:text-red-400 font-mono text-xs font-black shadow-sm" title="Preço Oculto (Modo Privacidade Ativo)">
+                  ${icons.eyeOff("w-3.5 h-3.5")}
+                  <span>Preço Oculto</span>
                 </div>`
-              : `<span class="text-[11px] text-slate-400 dark:text-slate-500 font-mono">Consulte balcão</span>`
+              : item.price !== null && item.price !== undefined
+                ? `<div class="font-mono text-sm font-black text-emerald-600 dark:text-emerald-400">
+                    R$ ${item.price.toFixed(2).replace('.', ',')}
+                  </div>`
+                : `<button class="btn-quick-price text-[11px] text-blue-600 dark:text-blue-400 hover:underline font-mono font-bold flex items-center gap-1" title="Clique para cadastrar o preço de balcão desta peça">
+                    ${icons.tag("w-3 h-3")}
+                    <span>Definir Preço</span>
+                  </button>`
           }
         </div>
 
@@ -263,5 +272,18 @@ export function renderProductCard(
     callbacks.onEditProduct(item);
   });
 
+  // 6. Definir Preço Rápido
+  card.querySelector('.btn-quick-price')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const raw = prompt(`Definir preço de balcão para ${item.commercialCodeRaw} (R$):`, item.price ? item.price.toFixed(2) : '');
+    if (raw !== null && raw.trim() !== '') {
+      const parsed = parseFloat(raw.replace(',', '.'));
+      if (!isNaN(parsed) && parsed >= 0) {
+        callbacks.onUpdatePrice?.(item, parsed);
+      }
+    }
+  });
+
   return card;
 }
+

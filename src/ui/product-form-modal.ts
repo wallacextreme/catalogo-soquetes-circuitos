@@ -587,3 +587,4 @@ export class ProductFormModal {
     this.close();
   }
 }
+

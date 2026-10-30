@@ -90,3 +90,4 @@ export interface BoxSummary {
   items: CatalogItem[];
   macroCategories: Set<MacroCategory>;
 }
+

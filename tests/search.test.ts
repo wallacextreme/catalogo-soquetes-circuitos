@@ -104,3 +104,4 @@ describe('Omnibox Engine (< 50ms) - Balcão de Peças', () => {
     expect(cleanCodeToken('DP.3111')).toBe('dp3111');
   });
 });
+

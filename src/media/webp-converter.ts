@@ -110,3 +110,4 @@ export function extractImageFromClipboard(event: ClipboardEvent): File | null {
   }
   return null;
 }
+

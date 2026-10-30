@@ -156,3 +156,4 @@ export function searchCatalog(
   const latencyMs = Math.round((performance.now() - startTime) * 100) / 100;
   return { results: filtered, latencyMs };
 }
+

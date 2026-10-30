@@ -241,3 +241,4 @@ if total_passed == total_gates:
 else:
     print(f"\n[FALHA] {total_gates - total_passed} gates falharam.")
     sys.exit(1)
+

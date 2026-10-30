@@ -634,3 +634,4 @@ def extract_catalogs() -> Dict[str, Any]:
 
 if __name__ == "__main__":
     extract_catalogs()
+
